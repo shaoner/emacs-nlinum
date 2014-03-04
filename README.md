@@ -5,4 +5,4 @@ This is a fork from [nlinum-1.2.el](http://elpa.gnu.org/packages/nlinum.html) th
 
 ## License
 
-GPL v2
+GPLv3
