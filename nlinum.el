@@ -35,6 +35,8 @@
 (require 'linum)                        ;For its face.
 
 (defvar nlinum--width 2)
+(defvar nlinum--margin-width 0)
+(defvar nlinum--format "%%%dd ")
 (make-variable-buffer-local 'nlinum--width)
 
 ;;;###autoload
@@ -59,7 +61,7 @@ Linum mode is a buffer-local minor mode."
   (nlinum--setup-windows))
 
 (defun nlinum--setup-window ()
-  (set-window-margins nil (if nlinum-mode nlinum--width)
+  (set-window-margins nil (if nlinum-mode nlinum--margin-width)
                       (cdr (window-margins))))
 
 (defun nlinum--setup-windows ()
@@ -99,7 +101,7 @@ Linum mode is a buffer-local minor mode."
 
 (defvar nlinum-format-function
   (lambda (line)
-    (let* ((fmt (format "%%%dd" nlinum--width))
+    (let* ((fmt (format nlinum--format nlinum--width))
            (str (propertize (format fmt line) 'face 'linum)))
       str))
   "Function to build the string representing the line number.
@@ -119,7 +121,8 @@ should be at least equal to `nlinum--width'.")
             (and (not (eobp)) (< (point) limit)
                  (let* ((ol (make-overlay (point) (1+ (point))))
                         (str (funcall nlinum-format-function line))
-                        (width (string-width str)))
+                        (width (length (number-to-string line))))
+                   (setq nlinum--margin-width (length str))
                    (when (< nlinum--width width)
                      (setq nlinum--width width)
                      (nlinum--flush))
@@ -127,7 +130,7 @@ should be at least equal to `nlinum--width'.")
                    (overlay-put ol 'evaporate t)
                    (overlay-put ol 'before-string
                                 (propertize " " 'display
-                                            `((margin left-margin) ,str)))
+                                            `((margin left-margin), str)))
                    (setq line (1+ line))
                    (zerop (forward-line 1))))))))
   nil)
